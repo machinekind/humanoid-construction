@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAMIAO Motor Setup Guide</title>
+<meta name="description" content="Step-by-step commissioning guide for DAMIAO (达妙) DM-J4340P-2EC motors with DM_Motor_Tool: English context, Polish instructions, original screenshots.">
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1b1f24; --muted:#5b6470; --line:#e3e6ea;
+    --en-bg:#eef4ff; --en-line:#3b6fd8;
+    --pl-bg:#f1faf1; --pl-line:#2f9e44;
+    --warn-bg:#fff4e5; --warn-line:#e8590c;
+    --danger-bg:#fff0f0; --danger-line:#d9480f;
+    --code-bg:#f3f4f6; --accent:#1f5fbf;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121417; --fg:#e6e8eb; --muted:#9aa3ad; --line:#2a2f36;
+      --en-bg:#172238; --en-line:#6c9cf5;
+      --pl-bg:#15271a; --pl-line:#5fcf72;
+      --warn-bg:#33240f; --warn-line:#ff922b;
+      --danger-bg:#3a1a1a; --danger-line:#ff6b6b;
+      --code-bg:#1d2127; --accent:#7fb0ff;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121417; --fg:#e6e8eb; --muted:#9aa3ad; --line:#2a2f36;
+    --en-bg:#172238; --en-line:#6c9cf5;
+    --pl-bg:#15271a; --pl-line:#5fcf72;
+    --warn-bg:#33240f; --warn-line:#ff922b;
+    --danger-bg:#3a1a1a; --danger-line:#ff6b6b;
+    --code-bg:#1d2127; --accent:#7fb0ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px}
+  h1{font-size:1.9rem;margin:0 0 6px}
+  h2{font-size:1.45rem;margin:48px 0 12px;padding-top:12px;border-top:2px solid var(--line)}
+  h3{font-size:1.15rem;margin:28px 0 8px}
+  .sub{color:var(--muted);font-size:.95rem}
+  a{color:var(--accent)}
+  code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.92em}
+  pre{background:var(--code-bg);padding:12px;border-radius:6px;overflow:auto;font-size:.88em}
+  .box{border-left:4px solid var(--line);padding:10px 14px;margin:12px 0;border-radius:4px}
+  .en{background:var(--en-bg);border-left-color:var(--en-line)}
+  .pl{background:var(--pl-bg);border-left-color:var(--pl-line)}
+  .warn{background:var(--warn-bg);border-left-color:var(--warn-line)}
+  .danger{background:var(--danger-bg);border-left-color:var(--danger-line)}
+  .box .tag{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;opacity:.75;margin-bottom:4px}
+  .box p:first-of-type{margin-top:4px}
+  .box ol,.box ul{margin:6px 0 6px 20px;padding:0}
+  .box li{margin:4px 0}
+  figure{margin:14px 0;text-align:center}
+  figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+  figure.small img{max-width:360px}
+  figure.tall img{max-height:520px;width:auto}
+  figcaption{color:var(--muted);font-size:.86rem;margin-top:6px}
+  .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+  .row figure{flex:1 1 260px;margin:8px 0}
+  details{margin:10px 0;border:1px dashed var(--line);border-radius:6px;padding:6px 12px}
+  summary{cursor:pointer;color:var(--muted);font-size:.9rem}
+  details .zh{white-space:pre-wrap;font-size:.9rem;line-height:1.6;margin-top:8px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.93rem}
+  th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+  th{background:var(--code-bg)}
+  nav.toc{background:var(--code-bg);border-radius:6px;padding:12px 18px;margin:16px 0}
+  nav.toc ol{margin:0;padding-left:20px}
+  nav.toc li{margin:2px 0}
+  .ui{font-weight:600}
+  .check li{margin:6px 0}
+  kbd{font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>DAMIAO Motor Setup Guide — DM-J4340P-2EC with DM_Motor_Tool</h1>
+  <div class="sub">
+    Context in <strong>English</strong>, operating instructions in <strong>Polish</strong>, original Chinese kept in collapsible blocks.<br>
+    Source: <a href="https://roboparty.feishu.cn/docx/FBmwd4BfqoIiKbx5t4ZctUtpntc">达妙电机保姆级调试流程文档</a> (Feishu, author space “萝博派对”, last modified 20 Apr 2026, change log entries dated 2026‑02‑02). Retrieved 9 Oct 2026. Screenshots are the originals from that document.
+  </div>
+</header>
+
+<div class="box en">
+  <span class="tag">Purpose of this page</span>
+  <p>This is the knowledge base for commissioning a brand‑new DAMIAO (达妙) joint motor: wiring it up, establishing serial/CAN communication with the vendor tool <strong>DM_Motor_Tool</strong>, running encoder and parameter calibration, assigning CAN IDs, saving the mechanical zero, and (if needed) updating firmware. The procedure was written by the original authors for the <strong>DM‑J4340P‑2EC (48 V)</strong>, firmware <code>6117</code>, DM_Motor_Tool <code>v1.8.0.1</code>. It applies to other DAMIAO motors with the caveats noted in each section.</p>
+</div>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#quickref">Quick reference for agents</a></li>
+    <li><a href="#s1">Software and hardware preparation</a> — 1.1 software, 1.2 wiring and safety</li>
+    <li><a href="#s2">Initialising a brand‑new motor</a> — 2.1 communication, 2.2 encoder calibration, 2.3 parameter calibration</li>
+    <li><a href="#s3">ID configuration and zero position</a> — 3.1 motor ID, 3.2 zero position</li>
+    <li><a href="#s4">Firmware update</a> — 4.1 preparation, 4.2 read version, 4.3 matching rule, 4.4 flashing</li>
+    <li><a href="#checklist">End‑to‑end checklist (PL) for execution by agents</a></li>
+    <li><a href="#glossary">UI glossary (Chinese → English → Polish)</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="quickref">Quick reference for agents</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Motor used in the source doc</td><td>DM‑J4340P‑2EC, rated <strong>DC 48 V</strong></td></tr>
+  <tr><td>Vendor tool</td><td>DM_Motor_Tool <strong>v1.8.0.1</strong> (Windows). Source: <a href="https://gitee.com/kit-miao/dm-tools">gitee.com/kit-miao/dm-tools</a></td></tr>
+  <tr><td>Firmware repository</td><td><a href="https://gitee.com/kit-miao/motor-firmware">gitee.com/kit-miao/motor-firmware</a></td></tr>
+  <tr><td>PC interface</td><td>USB‑to‑CAN adapter (vendor one); serial port settings <code>921600 baud, 8 data bits, no parity, 1 stop bit</code></td></tr>
+  <tr><td>Power</td><td>XT30 connector, adjustable bench PSU, <strong>current limit ≈ 3 A</strong>, never above rated voltage</td></tr>
+  <tr><td>CAN wiring</td><td>H↔H, L↔L. Default CAN bus speed shown in tool: 1000 kbps</td></tr>
+  <tr><td>ID rule</td><td><code>Master ID = Slave ID + 0x10</code>. Factory default Slave ID <code>0x01</code> (so Master <code>0x11</code>)</td></tr>
+  <tr><td>LED meaning</td><td>Red = powered, disabled. Green = enabled (motor energised)</td></tr>
+  <tr><td>Firmware naming</td><td>Version <code>6117</code> = model code <code>61</code> (DM‑J4340P‑2EC) + iteration <code>17</code>. Only flash files whose first two digits match the motor’s current firmware.</td></tr>
+  <tr><td>Flash success string</td><td><code>Update firmware completed!!!</code> in the serial console</td></tr>
+  <tr><td>Not retrieved</td><td>The Feishu attachment <code>USB转CAN.zip</code> (20.42 MB, bundle of the tool). Use the gitee repo instead.</td></tr>
+</table>
+
+<div class="box warn">
+  <span class="tag">Vendor warning (from the source doc)</span>
+  <p><strong>EN:</strong> Always use the official DAMIAO host software (DM_Motor_Tool). A mismatched version can produce garbled parameter reads or make it impossible to enter enable mode.<br>
+  <strong>PL:</strong> Zawsze używaj oficjalnego oprogramowania DAMIAO (DM_Motor_Tool). Niewłaściwa wersja może powodować „krzaki” przy odczycie parametrów albo uniemożliwić wejście w tryb <em>enable</em>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. Software and hardware preparation</h2>
+
+<h3 id="s11">1.1 Software environment</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>DM_Motor_Tool is a Windows desktop app that talks to the motor through the vendor USB‑to‑CAN adapter. It exposes tabs for <em>Serial</em>, <em>Parameter settings</em>, <em>Calibration</em>, <em>Debug</em> and <em>Analysis</em>, plus a text console that echoes everything the motor firmware prints. The document is based on v1.8.0.1; the tool is open source on gitee. Because the binary is unsigned, Windows SmartScreen blocks the first launch.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ol>
+    <li>Pobierz DM_Motor_Tool (wersja 1.8.0.1 lub nowsza) z repozytorium <a href="https://gitee.com/kit-miao/dm-tools">gitee.com/kit-miao/dm-tools</a>. W oryginalnym dokumencie był też załącznik <code>USB转CAN.zip</code> (20,42 MB) z gotowym narzędziem – nie został pobrany.</li>
+    <li>Uruchom program na Windows. Jeśli pojawi się okno „Windows protected your PC” (Windows 已保护你的电脑), kliknij <span class="ui">„More info”</span> (更多信息), a potem <span class="ui">„Run anyway”</span> (仍要运行).</li>
+  </ol>
+</div>
+<figure class="small">
+  <img src="images/01-windows-smartscreen-run-anyway.png" alt="Windows SmartScreen dialog blocking DM_Motor_Tool; the 'More info' link is highlighted">
+  <figcaption>Fig. 1 — SmartScreen on first launch: click “More info” (更多信息), then “Run anyway” (仍要运行). / Okno SmartScreen: „More info”, potem „Run anyway”.</figcaption>
+</figure>
+<details><summary>Original Chinese (1.1)</summary><div class="zh">1.1 软件环境
+• 调试工具：DM_Motor_Tool (本文档基于 v1.8.0.1 版本)，也可以直接使用附件的USB转CAN.zip。
+• 开源地址：https://gitee.com/kit-miao/dm-tools
+• 运行提示：若 Windows 提示“运行风险”，请点击“更多信息”并选择“仍要运行”。</div></details>
+
+<h3 id="s12">1.2 Hardware connection</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>The motor has two connectors: an <strong>XT30</strong> for DC power and a small signal connector carrying <strong>CAN H / CAN L</strong>. During bench commissioning the motor is powered from an adjustable lab PSU with the current limit engaged, so that a miswire or a short cannot deliver destructive current. The DM‑J4340P‑2EC is a 48 V motor; other DAMIAO motors are 24 V, so always read the label. Reverse power polarity or hot‑plugging under power can carbonise the connector and destroy the driver MCU, which the vendor considers unrepairable.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ol>
+    <li><strong>Dane:</strong> podłącz adapter USB‑CAN do komputera.</li>
+    <li><strong>Zasilanie:</strong> podłącz zasilacz do złącza XT30 silnika.
+      <div class="box warn" style="margin:6px 0"><strong>⚠️ Zdecydowanie zalecane:</strong> na etapie uruchamiania używaj regulowanego zasilacza laboratoryjnego z <strong>włączonym ograniczeniem prądu</strong>, żeby zwarcie nie uszkodziło silnika.</div>
+    </li>
+    <li><strong>Napięcie:</strong> sprawdź napięcie znamionowe na etykiecie silnika (DM‑J4340P‑2EC: <strong>48 V</strong>). Nigdy nie przekraczaj napięcia znamionowego. Zalecane ograniczenie prądu: <strong>3 A</strong>.</li>
+    <li><strong>Kontrola okablowania:</strong>
+      <ul>
+        <li>Zasilanie: <strong>nigdy</strong> nie zamieniaj biegunów (+/−).</li>
+        <li>Magistrala CAN: łącz <strong>H z H, L z L</strong>. Jeśli komunikacja nie działa, w pierwszej kolejności sprawdź, czy H/L nie są zamienione.</li>
+      </ul>
+    </li>
+  </ol>
+  <div class="box danger" style="margin:8px 0">
+    <strong>❗ Ostrzeżenia bezpieczeństwa:</strong>
+    <ul>
+      <li><strong>Nie podłączaj ani nie odłączaj niczego pod napięciem.</strong> Iskra przy podłączaniu pod napięciem zwęgla styki złącza, a nawet przebija MCU – silnik nadaje się wtedy do wyrzucenia.</li>
+      <li><strong>Prawidłowe wypinanie:</strong> złącze trzymaj za obudowę (plastik). Nigdy nie ciągnij za przewody.</li>
+    </ul>
+  </div>
+</div>
+<figure class="tall">
+  <img src="images/02-hardware-wiring-usb-can-motor.jpg" alt="Bench photo: USB-to-CAN adapter board with USB cable, CAN wires going to the motor's small connector, XT30 power lead, DAMIAO motor lying on the table">
+  <figcaption>Fig. 2 — Bench wiring: USB‑to‑CAN adapter (left), CAN signal lead to the motor connector, XT30 power lead (top right). / Okablowanie stanowiska: adapter USB‑CAN, przewód CAN do silnika, zasilanie XT30.</figcaption>
+</figure>
+<details><summary>Original Chinese (1.2)</summary><div class="zh">1.2 硬件连接
+1. 数据传输：将 USB 转 CAN 适配器插入 PC。
+2. 供电接入：XT30 接口连接电源。
+   ⚠️ 强力建议：调试阶段使用可调稳压电源，并将限流保护开启，防止短路。
+3. 电压匹配：确认电机额定电压（如本文 DM-J4340P-2EC 支持 48V），严禁超压，限流建议选择3A。
+4. 线序核对：
+   ◦ 电源线：严禁正负极反接。
+   ◦ CAN 总线：遵循 H 对 H，L 对 L。若通讯失败，优先交叉检查线序。
+❗ 安全警告：
+• 严禁带电热插拔：带电操作产生的瞬时火花极易导致接口碳化，甚至击穿 MCU 导致电机报废。
+• 正确拔插：插拔端子时应捏住胶壳受力，严禁直接暴力拽拉线束。</div></details>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. Initialising a brand‑new motor</h2>
+
+<h3 id="s21">2.1 Establish communication</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>On power‑up the motor LED turns <strong>red</strong> (powered, disabled). The adapter enumerates as a virtual COM port; DM_Motor_Tool talks to it at 921600 baud. Once the port is opened, the motor firmware prints a banner into the console: driver version, firmware version/sub‑version, current‑sense offsets, encoder offsets, CAN ID / Master ID / CAN baud, measured phase resistance and inductance, flux linkage, bus voltage, the four control modes (MIT, position‑speed cascade, speed, hybrid) and the console commands (<code>m</code> motor mode, <code>s</code> setup mode, <code>esc</code> exit). This banner is the first health check and also where you later read the firmware version.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ul>
+    <li><strong>Stan po włączeniu:</strong> po podaniu zasilania dioda silnika powinna świecić na <strong>czerwono</strong> (patrz Fig. 3).</li>
+    <li><strong>Wybór portu:</strong> w panelu <span class="ui">„通讯设定” (Communication settings)</span> kliknij <span class="ui">„刷新串口” (Refresh ports)</span> i wybierz właściwy port COM. Parametry: 921600 baud, 8 bitów danych, brak parzystości, 1 bit stopu (Fig. 4).
+      <ul><li><em>Wskazówka:</em> przed uruchomieniem odłącz od komputera inne niepotrzebne urządzenia szeregowe, żeby nie pomylić portów.</li></ul>
+    </li>
+    <li><strong>Otwarcie portu:</strong> kliknij <span class="ui">„打开串口” (Open serial port)</span>. W konsoli po prawej stronie pojawią się podstawowe dane silnika po włączeniu zasilania (Fig. 5). Jeśli nic się nie wyświetla – sprawdź okablowanie CAN (H/L) i zasilanie.</li>
+  </ul>
+</div>
+<div class="row">
+  <figure class="tall">
+    <img src="images/03-motor-label-red-led-power-on.jpg" alt="DAMIAO DM-J4340P-2EC (48V) motor label with the status LED lit red after power-on">
+    <figcaption>Fig. 3 — Powered motor: label “DM‑J4340P‑2EC (48V), 额定电压 DC 48V”, LED red. / Silnik po włączeniu, dioda czerwona.</figcaption>
+  </figure>
+  <figure class="small">
+    <img src="images/04-serial-settings-com-port.png" alt="Communication settings panel: port COM4, baud 921600, 8 data bits, parity None, stop bits One; buttons Refresh port and Open port">
+    <figcaption>Fig. 4 — 通讯设定: COM4 / 921600 / 8 / None / One; buttons 刷新串口 (refresh) and 打开串口 (open). / Panel ustawień portu.</figcaption>
+  </figure>
+</div>
+<figure>
+  <img src="images/05-serial-console-initial-motor-data.png" alt="Serial console after opening the port: DMBOT Motor Driver V3.0, Firmware Version 6117, Sub Version 004, current offsets, CAN ID 0x001, MASTER ID 0x000, CAN Baud 1.00Mbps, Rs, Ls, flux, V_BUS 48.3, control modes list, commands m/s/esc">
+  <figcaption>Fig. 5 — Console banner after “Open serial port”. Shows hardware V3.0, firmware 6117 sub 004, CAN ID 0x001, Master 0x000, 1 Mbps, motor Rs/Ls/Ψf, V_BUS ≈ 48.3 V. / Konsola po otwarciu portu.</figcaption>
+</figure>
+<pre>DMBOT Motor Driver--V3.0
+ Debug Info:
+Firmware Version: 6117
+Sub Version: 004
+Imax: 10.261194
+ I_U Offset: 2055.9480   I_V Offset: 2077.7070   I_W Offset: 2116.4961
+ Position Sensor Electrical Offset: -2.1390
+ Mechanical Offset: 0.0000
+ Output Position: 0.7150
+ CAN ID: 0x001   MASTER ID: 0x000   CAN Baud: 1.00Mbps
+ Motor Info: Rs = 736.9642 mΩ  Ls = 328.9949 μH  Ψf = 0.0046 Wb  V_BUS=48.2971
+ Control Mode: 1:MIT Mode &lt;----  2:position-speed cascade Mode  3:speed Mode  4:Hybrid control Mode
+ Commands: m - Motor Mode   s - Setup Mode   esc - Exit to Menu</pre>
+<details><summary>Original Chinese (2.1)</summary><div class="zh">2.1 建立通讯
+• 状态确认：上电后，电机指示灯应亮红灯。
+• 串口识别：点击“通讯设定”栏的刷新按钮，选择对应的 COM 口。
+   ◦ 建议：调试前断开电脑上其他无关串口设备，防止干扰识别。
+• 连接反馈：点击“打开串口”，右侧信息栏将打印电机上电的初始基本数据。</div></details>
+
+<h3 id="s22">2.2 Encoder calibration</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>The motor carries two magnetic encoders: one on the <strong>motor (rotor) side</strong> and one on the <strong>output shaft</strong> after the planetary gear. Calibration spins the motor slowly, measures the raw encoder signal, derives the number of pole pairs and the electrical offset, and computes a compensation table that linearises the encoder. It must be run with the motor <strong>unloaded</strong> (nothing attached to the output) because any external torque corrupts the measurement. The tool pops up a “calibration_wave_panel” window with four plots (raw data, compensation data, pulsation data, compensation effect) when a stage finishes; the compensation effect plot should be a clean straight line.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <p>Kalibracja ma dwa etapy. Silnik musi być <strong>bez obciążenia</strong> (nic nie może być zamontowane na wale wyjściowym).</p>
+  <ol>
+    <li><strong>Kalibracja enkodera po stronie silnika:</strong>
+      <ul>
+        <li>W panelu <span class="ui">„校准” (Calibration)</span> przełącznik domyślnie stoi na <span class="ui">„电机侧编码器” (enkoder po stronie silnika)</span>. Kliknij przycisk <span class="ui">„校准” (Start calibration)</span> (Fig. 6).</li>
+        <li>Po prawej stronie przełącz widok na <span class="ui">Calibration Data</span>. Program automatycznie wyznaczy kluczowe parametry fizyczne, m.in. liczbę par biegunów (dla tego silnika pojawia się komunikat „待校准电机极对数为: 14”, czyli 14 par biegunów – zatwierdź <span class="ui">„确定” (OK)</span>, Fig. 7).</li>
+        <li>Po zakończeniu pojawi się okno z pełną tabelą/wykresami danych kalibracji (Fig. 8). Wykres „Compensation effect” powinien być gładką linią prostą.</li>
+      </ul>
+    </li>
+    <li><strong>Kalibracja enkodera wału wyjściowego:</strong>
+      <ul>
+        <li>Ręcznie przełącz przełącznik na <span class="ui">„输出轴编码器” (enkoder wału wyjściowego)</span> (przełącznik zmienia kolor na czerwony, Fig. 9), ponownie kliknij <span class="ui">„校准”</span> i poczekaj na zakończenie.</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+<div class="row">
+  <figure class="small">
+    <img src="images/07-calibration-toggle-motor-side-encoder.png" alt="Calibration panel: Calibrate button and a green toggle labelled motor-side encoder">
+    <figcaption>Fig. 6 — 校准 panel, toggle on 电机侧编码器 (motor‑side encoder, green). / Panel kalibracji, enkoder po stronie silnika.</figcaption>
+  </figure>
+  <figure class="small">
+    <img src="images/08-calibration-prompt-pole-pairs.png" alt="Prompt dialog: pole pairs of motor to be calibrated: 14, OK button">
+    <figcaption>Fig. 7 — Prompt “待校准电机极对数为: 14” (pole pairs = 14), press 确定 (OK). / Komunikat o liczbie par biegunów.</figcaption>
+  </figure>
+  <figure class="small">
+    <img src="images/09-calibration-toggle-output-shaft-encoder.png" alt="Calibration panel with the toggle switched to output shaft encoder (red)">
+    <figcaption>Fig. 9 — Toggle switched to 输出轴编码器 (output‑shaft encoder, red). / Przełącznik na enkoder wału wyjściowego.</figcaption>
+  </figure>
+</div>
+<figure>
+  <img src="images/06-calibration-wave-panel-results.png" alt="calibration_wave_panel window with four plots: Raw Data, Compensation Data, Pulsation Data, Compensation effect, and a Save button">
+  <figcaption>Fig. 8 — “calibration_wave_panel” after the motor‑side stage: Raw Data, Compensation Data, Pulsation Data, Compensation effect (straight line = good). / Okno wyników kalibracji.</figcaption>
+</figure>
+<details><summary>Original Chinese (2.2)</summary><div class="zh">2.2 编码器校准 (Calibration)
+校准分为两个阶段，需确保电机处于空载状态：
+1. 电机侧编码器校准：
+   ◦ 在“校准”栏（默认电机侧），点击“开始校准”。
+   ◦ 右侧切换至 Calibration Data 视图，系统会自动提取电机极对数等核心物理参数。
+   ◦ 结束后会弹出完整的数据表格。
+2. 输出轴编码器校准：
+   ◦ 手动切换至“输出轴编码器”选项，再次点击校准并等待完成。</div></details>
+
+<h3 id="s23">2.3 Parameter calibration (motor identification)</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>“参数标定” identifies the electrical and mechanical model of the motor: phase resistance R, phase inductance L, flux linkage λ, viscous friction coefficient and rotor inertia. The firmware injects test currents and performs <strong>fast forward/reverse rotations</strong>, so the motor body must be restrained. When done, the values are written back into the “电机参数” (motor parameters) fields of the Parameter settings tab. Those fields also show the drive parameters (CAN ID, Master ID, CAN baud, timeouts, protection thresholds, control gains) and the CAN feedback/command frame layout, which is useful later when writing your own CAN driver.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ul>
+    <li><strong>Ścieżka:</strong> otwórz zakładkę <span class="ui">„参数设置” (Parameter settings)</span> i kliknij przycisk <span class="ui">„参数标定” (Parameter calibration)</span> (Fig. 10).</li>
+    <li><strong>Przygotowanie fizyczne – KLUCZOWE:</strong> podczas tej kalibracji silnik wykonuje szybkie obroty w przód i w tył. <strong>Trzymaj silnik mocno w dłoni albo zamocuj go w imadle</strong>, żeby nie „odleciał” ze stołu.</li>
+    <li><strong>Weryfikacja wyniku:</strong> po zakończeniu kluczowe parametry sterowania zostaną automatycznie wpisane do pól „电机参数” (Fig. 11): rezystancja fazy (R), indukcyjność fazy (L), strumień (λ), współczynnik tarcia lepkiego, moment bezwładności. Pola nie mogą być puste ani zerowe.</li>
+  </ul>
+</div>
+<figure>
+  <img src="images/10-parameter-settings-tab-param-calibration.png" alt="Parameter settings tab of DM_Motor_Tool: motor parameters block with the Parameter calibration button, drive parameters (CAN ID, Master ID, baud, timeouts, limits), control gains, and the CAN feedback/control frame layout table with a control block diagram">
+  <figcaption>Fig. 10 — 参数设置 tab (highlighted) with the 参数标定 button, drive parameters, control limits (PMAX/VMAX/TMAX/KT_OUT), and the CAN frame layout and MIT control diagram. / Zakładka parametrów z przyciskiem kalibracji parametrów.</figcaption>
+</figure>
+<figure class="small">
+  <img src="images/11-motor-parameters-after-calibration.png" alt="Motor parameters block after calibration: R 828.9533 mR, L 390.4602 uH, flux 0.0043 Wb, viscous 0.0001163434, inertia 1.668685E-05 kg*m2">
+  <figcaption>Fig. 11 — Identified values auto‑filled: R ≈ 829 mΩ, L ≈ 390 µH, λ ≈ 0.0045 Wb, viscous ≈ 1.16e‑4, inertia ≈ 1.67e‑5 kg·m². / Parametry po kalibracji.</figcaption>
+</figure>
+<details><summary>Original Chinese (2.3)</summary><div class="zh">2.3 参数标定
+• 操作路径：进入“参数设置” -> 点击“参数标定”。
+• 物理准备：关键！ 此次标定电机会执行快速正反转，请务必用手稳固抓持电机或使用台钳固定，防止电机甩飞。
+• 结果确认：标定完成后，各项关键控制参数将自动回填至参数栏。</div></details>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. ID configuration and zero position</h2>
+
+<h3 id="s31">3.1 Change the motor ID</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>Every DAMIAO motor listens on a <strong>Slave ID</strong> (the CAN ID you send commands to) and answers on a <strong>Master ID</strong>. The firmware enforces the offset <code>Master ID = Slave ID + 0x10</code>. Factory default is Slave <code>0x01</code> / Master <code>0x11</code>. On a multi‑motor bus (e.g. a humanoid leg) each motor needs a unique Slave ID, so this step is done once per motor on the bench, before the motor is installed. The tool can connect over the serial (UART) path or directly in CAN mode; in CAN mode you must type the motor’s current Slave ID to reach it.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <p>Zasada: <code>Master ID = Slave ID + 0x10</code>. Przykład: jeśli ustawisz Slave ID = <code>0x01</code>, to Master ID musi wynosić <code>0x11</code>.</p>
+  <p><strong>Zapis przez port szeregowy (UART):</strong></p>
+  <ol type="a">
+    <li>W zakładce <span class="ui">„调试” (Debug)</span>, w panelu <span class="ui">„CAN ID”</span>, wpisz docelowe ID w polach Master ID / Slave ID.</li>
+    <li>Kliknij <span class="ui">„设定” (Set)</span>, żeby zapisać do silnika (Fig. 12, zaznaczony przycisk).</li>
+    <li><strong>Test weryfikacyjny:</strong> ręcznie wyczyść pola Master/Slave ID w programie i kliknij <span class="ui">„读取” (Read)</span>. Jeśli wrócą właśnie ustawione wartości, zapis się powiódł.</li>
+  </ol>
+  <p><strong>Szybkie połączenie w trybie CAN:</strong></p>
+  <ul>
+    <li>Fabryczne Slave ID silnika to <code>0x01</code>.</li>
+    <li>W panelu <span class="ui">„USB模式” (USB mode)</span> przełącz z UART na <span class="ui">CAN</span>, wpisz CAN ID <code>0x01</code> – połączenie nastąpi od razu (Fig. 13).</li>
+    <li>Jeśli trzeba zmienić ID, wykonaj kroki a–c powyżej (panel CAN ID, Fig. 14).</li>
+  </ul>
+</div>
+<figure>
+  <img src="images/12-debug-tab-set-slave-id.png" alt="DM_Motor_Tool Debug tab: left column with communication settings, USB mode UART, firmware upgrade block, calibration; centre with position/velocity/torque plots; right column CAN ID panel with Master ID 0x11 and Slave ID 0x01, the Set button highlighted in red, motor mode buttons Enable / Save zero / Disable, CAN baud 1000 kbps, MIT control parameters">
+  <figcaption>Fig. 12 — 调试 (Debug) tab. Right column: CAN ID panel with Master 0x11 / Slave 0x01 and the <strong>设定 (Set)</strong> button highlighted; below it 电机模式 (motor mode) buttons 使能 / 保存零点 / 失能. / Zakładka Debug, zapis ID.</figcaption>
+</figure>
+<div class="row">
+  <figure class="small">
+    <img src="images/13-comm-settings-can-mode.png" alt="Communication settings panel with USB mode switched to CAN and CAN ID 0x01">
+    <figcaption>Fig. 13 — USB模式 toggled to <strong>CAN</strong>, CAN ID 0x01. / Tryb USB przełączony na CAN.</figcaption>
+  </figure>
+  <figure class="small">
+    <img src="images/14-can-id-motor-mode-baud-panel.png" alt="CAN ID panel: Master ID 0x00 with Read button, Slave ID 0x01 with Set button; motor mode: Enable, Save zero, Disable; CAN baud 1000 kbps with Set button; rad/s toggle">
+    <figcaption>Fig. 14 — CAN ID panel (读取 = Read, 设定 = Set), 电机模式 (使能 Enable / 保存零点 Save zero / 失能 Disable), CAN 波特率 1000 kbps. / Panel CAN ID i trybu silnika.</figcaption>
+  </figure>
+</div>
+<details><summary>Original Chinese (3.1)</summary><div class="zh">3.1 修改电机 ID
+达妙电机的通讯 ID 遵循特定的偏移逻辑：Master ID = Slave ID + 0x10。
+• 示例：若设定 Slave ID 为 0x01，则 Master ID 必须对应为 0x11。
+• 串口写入步骤：
+   a. 在调试界面的 ID 输入框内填入目标 ID。
+   b. 点击 “设定” 执行写入。
+   c. 验证测试：手动清除界面上的 Master/Slave ID 数据，点击 “读取”。若能正常回显刚才设置的值，说明写入成功。
+CAN 模式快速连接：
+• 电机出厂默认 Slave ID 为0x01。
+• 切换至 CAN 模式，输入0x01即可直接连接。
+• 如需修改 ID，执行上述写入步骤即可。</div></details>
+
+<h3 id="s32">3.2 Set the zero position</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>The motor reports position relative to a stored zero. For a robot joint the zero must coincide with the <strong>mechanical zero of the joint</strong>, which only exists once the motor is bolted into the structure. Therefore this step is repeated after installation. The sequence is: enable the motor (LED turns green, motor holds), move the joint to its mechanical zero (by hand with the motor enabled at zero torque, or by commanding it), press <em>Save zero</em>, confirm the CAN TX counter increments (proof that the command went out), then disable (LED back to red). Saving the zero while the motor is disabled does not take effect, which is why the enable/disable bracketing is part of the procedure.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <p><strong>Uwaga:</strong> po zamontowaniu silnika w przegubie robota zero jest ograniczone przez mechanikę – <strong>tę operację trzeba wykonać ponownie po montażu</strong>.</p>
+  <ol>
+    <li><strong>Włącz silnik (enable):</strong> w panelu <span class="ui">„电机模式” (Motor mode)</span> kliknij <span class="ui">„使能” (Enable)</span>. Poczekaj, aż dioda silnika zmieni kolor na <strong>zielony</strong> – potwierdza to poprawne włączenie.</li>
+    <li><strong>Ustaw zero mechaniczne:</strong> ręcznie lub programowo obróć silnik do docelowego położenia zerowego konstrukcji.</li>
+    <li><strong>Zapisz zero:</strong> kliknij <span class="ui">„保存零点” (Save zero point)</span> (Fig. 15, zaznaczony przycisk). Obserwuj licznik wysłanych ramek CAN („发送” w dolnym pasku) – gdy jego wartość się zmieni, zero zostało zapisane i obowiązuje.</li>
+    <li><strong>Wyłącz silnik (disable):</strong> w panelu „电机模式” kliknij <span class="ui">„失能” (Disable)</span>. Poczekaj, aż dioda wróci na <strong>czerwony</strong>.</li>
+  </ol>
+</div>
+<figure>
+  <img src="images/15-debug-tab-save-zero-point.png" alt="DM_Motor_Tool Debug tab with the Save zero point button highlighted in red in the motor mode panel; Master ID 0x11, Slave ID 0x01">
+  <figcaption>Fig. 15 — 调试 tab with <strong>保存零点 (Save zero point)</strong> highlighted. Port is open (关闭串口 button green), Master 0x11 / Slave 0x01. / Zapis punktu zerowego.</figcaption>
+</figure>
+<details><summary>Original Chinese (3.2)</summary><div class="zh">3.2 标定零点 (Zero Position)
+• 注意：电机安装到机器人关节后，受限于机械零位，必须重新进行此操作。
+• 操作：
+   ◦ 使能电机：在“电机模式”栏中，点击 “使能” 按钮，待电机状态指示灯变为绿灯，确认电机已正常使能
+   ◦ 转动至机械零位手动或通过程序控制，将电机转动至机械结构的目标零点位置。
+   ◦ 保存零点配置点击界面上的 “保存零点” 按钮，等待 CAN 发送数量发生变化，即完成零点的保存与生效。
+   ◦ 失能电机：在“电机模式”栏中，点击 “失能” 按钮，待电机状态指示灯变为红灯，确认电机已正常失能</div></details>
+
+<!-- ============================================================ -->
+<h2 id="s4">4. Firmware update</h2>
+
+<h3 id="s41">4.1 Preparation</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>Firmware images are published on gitee. The driver board exists in several hardware revisions and each motor series has its own firmware line; flashing a file for a different series or hardware revision bricks the driver permanently. Firmware updates are optional for a working motor; do them only when the vendor release notes list a fix you need.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ul>
+    <li><strong>Oficjalne repozytorium firmware:</strong> <a href="https://gitee.com/kit-miao/motor-firmware">gitee.com/kit-miao/motor-firmware</a>.</li>
+    <li><strong>Zasada nadrzędna:</strong> przed wgraniem przeczytaj uważnie oficjalne notatki o wydaniu. <strong>Nigdy nie wgrywaj firmware z innej serii silników ani dla innej wersji sprzętu</strong> – grozi to trwałym uszkodzeniem warstwy sterownika („cegła”).</li>
+  </ul>
+</div>
+<details><summary>Original Chinese (4.1)</summary><div class="zh">4.1 准备工作
+• 官方固件库：https://gitee.com/kit-miao/motor-firmware
+• 核心原则：烧录前必须仔细阅读官方更新说明。严禁跨系列、跨硬件版本烧录，否则可能导致电机驱动层永久损坏（变砖）。</div></details>
+
+<h3 id="s42">4.2 Read the current version</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>The first lines of the console banner identify the driver hardware (“DMBOT Motor Driver--V3.0”), the firmware main version (e.g. 6117) and the sub‑version (e.g. 004). The “固件升级” (firmware upgrade) block on the left also shows Firmware REV (6.1.1.7) and Bootloader REV (3.2.0.6) after pressing “读版本” (Read version). The hardware version decides which firmware files are allowed.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <p>Przed wgraniem firmware trzeba potwierdzić wersję sprzętową płytki silnika:</p>
+  <ol>
+    <li>Połącz się z programem i otwórz port szeregowy (jak w 2.1).</li>
+    <li>W konsoli odczytaj stan sprzętu i firmware (Fig. 16, zaznaczony fragment):
+      <ul>
+        <li><strong>Hardware Version</strong> – np. <code>V3.0</code> (pobierany firmware musi wspierać tę wersję sprzętu).</li>
+        <li><strong>Firmware Version</strong> – np. <code>6117</code> (wersja główna).</li>
+        <li><strong>Sub‑Version</strong> – np. <code>4</code> (podwersja).</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+<figure>
+  <img src="images/16-serial-console-read-firmware-version.png" alt="Serial console with the first four lines highlighted: DMBOT Motor Driver--V3.0, Debug Info, Firmware Version 6117, Sub Version 004; left panel shows Firmware REV 6.1.1.7 and Bootloader REV 3.2.0.6">
+  <figcaption>Fig. 16 — Version read‑out: hardware V3.0, firmware 6117, sub‑version 004 (highlighted). Left: Firmware REV 6.1.1.7, Bootloader REV 3.2.0.6. / Odczyt wersji.</figcaption>
+</figure>
+<details><summary>Original Chinese (4.2)</summary><div class="zh">4.2 读取当前版本
+在烧录前，必须确认电机的硬件底座版本：
+1. 连接上位机并打开串口。
+2. 在信息栏查看硬件与固件状态：
+   ◦ Hardware Version：例如 V3.0（需确保下载的固件支持此硬件版本）。
+   ◦ Firmware Version：例如 6117（主版本号）。
+   ◦ Sub-Version：例如 4（子版本号）。</div></details>
+
+<h3 id="s43">4.3 Firmware download and matching rule</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>Firmware file names encode the motor model, voltage, version and sub‑version, e.g. <code>APP_DM4340(48V)_V6117_04.bin</code>. The version number’s first two digits are the <strong>model code</strong> (61 = DM‑J4340P‑2EC family), the last two are the iteration. The matching rule is simply: the first two digits of the file’s version must equal the first two digits of the firmware currently on the motor.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <p>Przy pobieraniu firmware stosuj zasadę <strong>„pierwsze dwie cyfry muszą się zgadzać”</strong>, żeby dobrać plik do modelu silnika:</p>
+  <ul>
+    <li>Przykład: aktualna wersja to <code>6117</code>.</li>
+    <li><code>61</code> = kod modelu (np. DM‑J4340P‑2EC), <code>17</code> = numer iteracji (V17).</li>
+    <li><strong>Zakaz:</strong> nigdy nie próbuj wgrywać firmware, którego wersja nie zaczyna się od <code>61</code> (dla tego silnika).</li>
+    <li>Dla DM‑J4340P‑2EC 48 V właściwy plik to np. <code>APP_DM4340(48V)_V6117_04.bin</code> (Fig. 17, zaznaczony).</li>
+  </ul>
+</div>
+<figure>
+  <img src="images/17-gitee-firmware-file-list.png" alt="gitee file listing: APP_DM3507(V3_48V)_V6517_03.bin, APP_DM3507(V3_48V)_V6517_04.bin, APP_DM4310(48V)_V6017_03.bin, APP_DM4310(48V)_V6017_04.bin, APP_DM4340(48V)_V6117_03.bin, APP_DM4340(48V)_V6117_04.bin (highlighted)">
+  <figcaption>Fig. 17 — Firmware repo listing. DM4310 uses 60xx, DM4340 uses 61xx, DM3507 uses 65xx. For this motor: <code>APP_DM4340(48V)_V6117_04.bin</code>. / Lista plików firmware.</figcaption>
+</figure>
+<details><summary>Original Chinese (4.3)</summary><div class="zh">4.3 固件下载与匹配逻辑
+下载固件时，请遵循“前两位一致”原则来确定电机型号匹配：
+• 案例说明：
+   ◦ 当前版本号为 6117。
+   ◦ 61 代表型号代码（如 DM-J4340P-2EC），17 代表当前迭代版本 V17。
+   ◦ 禁忌：严禁尝试烧录前两位非 61 开头的固件。</div></details>
+
+<h3 id="s44">4.4 Flashing procedure</h3>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>Flashing is done from the “固件升级” (firmware upgrade) block in the left column of the Debug tab: select the .bin, press upgrade, watch the progress bar and the console. The bootloader transfers the image in packs (“Pack 1 pass:OK … Pack 7 pass:OK”) and prints <code>Update firmware completed!!!</code>; the motor then reboots and prints its banner again, where the new version can be verified. Losing power or the data link mid‑transfer can leave the driver in a bricked state.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Instrukcja (PL)</span>
+  <ol>
+    <li><strong>Wybór firmware:</strong> w bloku <span class="ui">„固件升级” (Firmware upgrade)</span> kliknij <span class="ui">„固件选择” (Select firmware)</span> i wczytaj pobrany plik <code>.bin</code> (lub inny obsługiwany format). Nazwa pliku pojawi się w polu „固件名称” (Fig. 18).</li>
+    <li><strong>Ponowna weryfikacja:</strong> jeszcze raz sprawdź, czy model, napięcie i wersja sprzętu w nazwie pliku zgadzają się z fizycznym silnikiem.</li>
+    <li><strong>Wgranie:</strong>
+      <ul>
+        <li>Kliknij <span class="ui">„固件升级” (Start upgrade)</span>.</li>
+        <li><strong>Podczas wgrywania nie wolno odłączać zasilania ani przewodu danych!</strong></li>
+      </ul>
+    </li>
+    <li><strong>Potwierdzenie wyniku:</strong>
+      <ul>
+        <li>Po ok. 5 sekundach w konsoli powinien pojawić się napis <code>Update firmware completed!!!</code> – oznacza to sukces (Fig. 19).</li>
+        <li>Silnik następnie sam się zrestartuje i wypisze banner startowy – sprawdź w nim nową wersję firmware.</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+<div class="row">
+  <figure class="small">
+    <img src="images/18-firmware-upgrade-panel-select-file.png" alt="Firmware upgrade block: Read version button, Firmware REV 6.1.1.7, Bootloader REV 3.2.0.6, Select firmware and Firmware upgrade buttons, firmware name DM4340(48V)_V6117_04, progress 0%">
+    <figcaption>Fig. 18 — 固件升级 block: 读版本 (read version), 固件选择 (select), 固件升级 (upgrade), name DM4340(48V)_V6117_04, progress 0 %. / Panel aktualizacji firmware.</figcaption>
+  </figure>
+</div>
+<figure>
+  <img src="images/19-serial-console-update-firmware-completed.png" alt="Serial console showing Pack 1..7 pass:OK and 'Update firmware completed!!!' highlighted, followed by the motor's startup banner with Firmware Version 6117">
+  <figcaption>Fig. 19 — Success: “Pack 1…7 pass:OK”, then <code>Update firmware completed!!!</code>, followed by the reboot banner. / Konsola po udanym wgraniu firmware.</figcaption>
+</figure>
+<details><summary>Original Chinese (4.4)</summary><div class="zh">4.4 烧录流程
+1. 选择固件：点击“固件选择”按钮，载入已下载的 .bin 或相关格式文件。
+2. 二次核对：再次确认文件名中的型号、电压及硬件版本是否与物理电机一致。
+3. 执行烧录：
+   ◦ 点击“开始升级”。
+   ◦ 烧录期间禁止断电或断开数据线！
+4. 结果确认：
+   ◦ 等待约 5 秒，当串口消息区回传 “Update firmware completed!!!” 字样时，表示升级成功。
+   ◦ 随后电机会重新初始化。</div></details>
+
+<!-- ============================================================ -->
+<h2 id="checklist">End‑to‑end checklist for execution (PL)</h2>
+<div class="box en">
+  <span class="tag">Context (EN)</span>
+  <p>Condensed, ordered procedure for one motor. Each step has a pass criterion so an agent (or a person) can tell when to move on. Firmware update (section 4) is <em>not</em> part of the standard path; do it only when required.</p>
+</div>
+<div class="box pl">
+  <span class="tag">Lista kontrolna (PL)</span>
+  <ol class="check">
+    <li><strong>Narzędzie:</strong> DM_Motor_Tool v1.8.0.1 uruchomiony (SmartScreen → „Run anyway”). <em>OK, gdy okno programu jest otwarte.</em></li>
+    <li><strong>Zasilacz:</strong> ustawione napięcie znamionowe z etykiety (48 V dla DM‑J4340P‑2EC), limit prądu 3 A, wyjście <strong>wyłączone</strong>.</li>
+    <li><strong>Okablowanie przy wyłączonym zasilaniu:</strong> XT30 (+/− sprawdzone), CAN H↔H i L↔L, adapter USB‑CAN w komputerze. Silnik luzem, bez obciążenia na wale.</li>
+    <li><strong>Włączenie zasilania:</strong> dioda silnika <strong>czerwona</strong>. <em>Jeśli nie – wyłącz zasilanie i sprawdź okablowanie.</em></li>
+    <li><strong>Port:</strong> „刷新串口” → wybór COM → 921600/8/N/1 → „打开串口”. <em>OK, gdy w konsoli pojawia się banner „DMBOT Motor Driver”.</em> Zanotuj: Hardware Version, Firmware Version, Sub Version, CAN ID, MASTER ID.</li>
+    <li><strong>Kalibracja enkodera silnika:</strong> panel „校准”, przełącznik na „电机侧编码器”, klik „校准”, zatwierdź liczbę par biegunów, poczekaj na okno „calibration_wave_panel”. <em>OK, gdy „Compensation effect” jest prostą linią.</em></li>
+    <li><strong>Kalibracja enkodera wału:</strong> przełącznik na „输出轴编码器”, klik „校准”, poczekaj na koniec.</li>
+    <li><strong>Kalibracja parametrów:</strong> zakładka „参数设置” → „参数标定”. <strong>Silnik trzymany/zamocowany!</strong> <em>OK, gdy pola R, L, λ, tarcie, bezwładność są wypełnione niezerowymi wartościami.</em></li>
+    <li><strong>ID:</strong> zakładka „调试”, panel „CAN ID”: wpisz Slave ID = N, Master ID = N + 0x10, klik „设定”. Wyczyść pola, klik „读取”. <em>OK, gdy wracają te same wartości.</em></li>
+    <li><strong>Zero (na stanowisku lub po montażu w przegubie):</strong> „使能” → dioda zielona → ustaw zero mechaniczne → „保存零点” → licznik „发送” wzrósł → „失能” → dioda czerwona.</li>
+    <li><strong>Zakończenie:</strong> „关闭串口” (zamknij port), wyłącz zasilacz, dopiero potem odłącz złącza (za obudowę).</li>
+    <li><em>(Opcjonalnie) Firmware:</em> odczyt wersji → plik z pasującymi pierwszymi dwiema cyframi i wersją sprzętu → „固件选择” → „固件升级” → czekaj na „Update firmware completed!!!” → sprawdź nową wersję w bannerze.</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="glossary">UI glossary (Chinese → English → Polish)</h2>
+<table>
+  <tr><th>Chinese (as in the tool)</th><th>English</th><th>Polish</th></tr>
+  <tr><td>通讯设定</td><td>Communication settings</td><td>Ustawienia komunikacji</td></tr>
+  <tr><td>串口号 / 波特率 / 数据位 / 校验位 / 停止位</td><td>Port / Baud rate / Data bits / Parity / Stop bits</td><td>Port / Prędkość / Bity danych / Parzystość / Bity stopu</td></tr>
+  <tr><td>刷新串口 / 打开串口 / 关闭串口</td><td>Refresh ports / Open port / Close port</td><td>Odśwież porty / Otwórz port / Zamknij port</td></tr>
+  <tr><td>串口接收 · 显示接收 · ASCII</td><td>Serial receive · Show received · ASCII mode</td><td>Odbiór · Pokaż odebrane · Tryb ASCII</td></tr>
+  <tr><td>USB模式 (UART / CAN)</td><td>USB mode (UART / CAN)</td><td>Tryb USB (UART / CAN)</td></tr>
+  <tr><td>固件升级 · 读版本 · 固件选择 · 固件名称 · 升级进度</td><td>Firmware upgrade · Read version · Select firmware · Firmware name · Progress</td><td>Aktualizacja firmware · Odczyt wersji · Wybór pliku · Nazwa · Postęp</td></tr>
+  <tr><td>校准 · 电机侧编码器 · 输出轴编码器</td><td>Calibration · Motor‑side encoder · Output‑shaft encoder</td><td>Kalibracja · Enkoder silnika · Enkoder wału wyjściowego</td></tr>
+  <tr><td>参数预设 · 参数导出 · 参数导入</td><td>Parameter presets · Export · Import</td><td>Presety · Eksport · Import parametrów</td></tr>
+  <tr><td>参数设置 · 参数标定 · 读参数 · 写参数</td><td>Parameter settings · Parameter calibration · Read params · Write params</td><td>Ustawienia parametrów · Kalibracja parametrów · Odczyt · Zapis</td></tr>
+  <tr><td>电机参数：相电阻 / 相电感 / 磁链 / 粘滞系数 / 转动惯量</td><td>Motor params: phase R / phase L / flux linkage / viscous coeff. / inertia</td><td>Parametry silnika: R fazy / L fazy / strumień / tarcie lepkie / bezwładność</td></tr>
+  <tr><td>驱动参数：极对数 / 减速比 / CAN ID / Master ID / CAN波特率 / CAN Timeout / 欠压 / 过压 / 过温 / 过流 / 限速</td><td>Drive params: pole pairs / gear ratio / CAN ID / Master ID / CAN baud / CAN timeout / under‑V / over‑V / over‑temp / over‑current / speed limit</td><td>Parametry napędu: pary biegunów / przełożenie / CAN ID / Master ID / baud CAN / timeout / pod‑ i nadnapięcie / temperatura / nadprąd / limit prędkości</td></tr>
+  <tr><td>控制幅值：PMAX / VMAX / TMAX / KT_OUT / 齿轮系数 / 阻尼因子</td><td>Control limits: position / velocity / torque max, torque constant, gear coefficient, damping factor</td><td>Limity sterowania: pozycja / prędkość / moment, stała momentu, wsp. przekładni, tłumienie</td></tr>
+  <tr><td>控制设置 · 控制模式 (MIT / 位置速度 / 速度 / 力位混合) · 电流带宽 · 速度 KP/KI · 位置 KP/KI</td><td>Control settings · Control mode (MIT / position‑speed cascade / speed / hybrid) · current bandwidth · speed KP/KI · position KP/KI</td><td>Ustawienia regulatora · Tryb (MIT / kaskada poz.‑prędk. / prędkość / hybryda) · pasmo prądu · KP/KI prędkości · KP/KI pozycji</td></tr>
+  <tr><td>调试</td><td>Debug tab</td><td>Zakładka Debug</td></tr>
+  <tr><td>CAN ID：Master ID 读取 · Slave ID 设定</td><td>CAN ID: Master ID “Read” · Slave ID “Set”</td><td>CAN ID: odczyt Master ID · zapis Slave ID</td></tr>
+  <tr><td>电机模式：使能 / 保存零点 / 失能</td><td>Motor mode: Enable / Save zero point / Disable</td><td>Tryb silnika: Włącz / Zapisz zero / Wyłącz</td></tr>
+  <tr><td>CAN 波特率 · 设置</td><td>CAN baud rate · Set</td><td>Prędkość CAN · Ustaw</td></tr>
+  <tr><td>位置 / 速度 / 力矩</td><td>Position / Velocity / Torque (plots)</td><td>Pozycja / Prędkość / Moment (wykresy)</td></tr>
+  <tr><td>控制参数：位置 · 速度 · KP · KD · 转矩 (MIN/MAX)</td><td>MIT control inputs: position, velocity, KP, KD, torque (with min/max)</td><td>Wejścia MIT: pozycja, prędkość, KP, KD, moment</td></tr>
+  <tr><td>CAN数据帧 · 状态 · 电机温度 · 驱动温度 · 定时发送 · 更新 / 清除 / 发送</td><td>CAN frame · status · motor temp · driver temp · periodic send · Update / Clear / Send</td><td>Ramka CAN · stan · temp. silnika · temp. sterownika · wysyłanie cykliczne · Aktualizuj / Wyczyść / Wyślij</td></tr>
+  <tr><td>保存数据 · 清空数据 · 接收 · 发送 · 清空计数</td><td>Save data · Clear data · RX count · TX count · Reset counters (status bar)</td><td>Zapisz dane · Wyczyść · Odebrane · Wysłane · Zeruj liczniki (pasek stanu)</td></tr>
+  <tr><td>提示 · 确定 · 待校准电机极对数为</td><td>Prompt · OK · “Pole pairs of motor to calibrate:”</td><td>Komunikat · OK · „Liczba par biegunów silnika do kalibracji:”</td></tr>
+</table>
+
+<div class="box en" style="margin-top:32px">
+  <span class="tag">Provenance</span>
+  <p>Text was extracted block‑by‑block from the Feishu document on 9 Oct 2026; the 19 images are the originals served by Feishu for that document (two bench photos were downscaled to 1600 px). The Chinese passages in the collapsible blocks are verbatim. Translations and the “Context (EN)” paragraphs are editorial additions written for this project; where they go beyond the source (e.g. interpretation of the console banner, the glossary), they are based on what is visible in the screenshots.</p>
+</div>
+
+</div>
+</body>
+</html>
