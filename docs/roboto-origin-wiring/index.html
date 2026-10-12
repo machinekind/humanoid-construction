@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roboto Origin Wiring Guide</title>
+<meta name="description" content="English translation of the RoboParty Roboto Origin prototype wiring guide: harness BOM, motor-to-motor CAN/power chain, battery and main board installation, board interconnects, harness fixing.">
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1b1f24; --muted:#5b6470; --line:#e3e6ea;
+    --en-bg:#eef4ff; --en-line:#3b6fd8;
+    --warn-bg:#fff4e5; --warn-line:#e8590c;
+    --danger-bg:#fff0f0; --danger-line:#d9480f;
+    --code-bg:#f3f4f6; --accent:#1f5fbf;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121417; --fg:#e6e8eb; --muted:#9aa3ad; --line:#2a2f36;
+      --en-bg:#172238; --en-line:#6c9cf5;
+      --warn-bg:#33240f; --warn-line:#ff922b;
+      --danger-bg:#3a1a1a; --danger-line:#ff6b6b;
+      --code-bg:#1d2127; --accent:#7fb0ff;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121417; --fg:#e6e8eb; --muted:#9aa3ad; --line:#2a2f36;
+    --en-bg:#172238; --en-line:#6c9cf5;
+    --warn-bg:#33240f; --warn-line:#ff922b;
+    --danger-bg:#3a1a1a; --danger-line:#ff6b6b;
+    --code-bg:#1d2127; --accent:#7fb0ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px}
+  h1{font-size:1.9rem;margin:0 0 6px}
+  h2{font-size:1.45rem;margin:48px 0 12px;padding-top:12px;border-top:2px solid var(--line)}
+  h3{font-size:1.15rem;margin:28px 0 8px}
+  h4{font-size:1rem;margin:20px 0 6px}
+  .sub{color:var(--muted);font-size:.95rem}
+  a{color:var(--accent)}
+  code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.92em}
+  .box{border-left:4px solid var(--line);padding:10px 14px;margin:12px 0;border-radius:4px}
+  .en{background:var(--en-bg);border-left-color:var(--en-line)}
+  .warn{background:var(--warn-bg);border-left-color:var(--warn-line)}
+  .danger{background:var(--danger-bg);border-left-color:var(--danger-line)}
+  .box .tag{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;opacity:.75;margin-bottom:4px}
+  .box p:first-of-type{margin-top:4px}
+  .box ol,.box ul{margin:6px 0 6px 20px;padding:0}
+  .box li{margin:4px 0}
+  figure{margin:14px 0;text-align:center}
+  figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+  figure.small img{max-width:360px}
+  figure.tall img{max-height:520px;width:auto}
+  figcaption{color:var(--muted);font-size:.86rem;margin-top:6px}
+  .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+  .row figure{flex:1 1 260px;margin:8px 0}
+  details{margin:10px 0;border:1px dashed var(--line);border-radius:6px;padding:6px 12px}
+  summary{cursor:pointer;color:var(--muted);font-size:.9rem}
+  details .zh{white-space:pre-wrap;font-size:.9rem;line-height:1.6;margin-top:8px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.93rem}
+  th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+  th{background:var(--code-bg)}
+  nav.toc{background:var(--code-bg);border-radius:6px;padding:12px 18px;margin:16px 0}
+  nav.toc ol{margin:0;padding-left:20px}
+  nav.toc li{margin:2px 0}
+  .check li{margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>RoboParty Roboto Origin — Prototype Wiring Guide</h1>
+  <div class="sub">
+    English translation of the RoboParty internal document. Original Chinese is kept in collapsible blocks under each section.<br>
+    Source: <a href="https://roboparty.feishu.cn/wiki/Nop3wgiG1iRHjfkgjnLc3dUjn6F">萝博头原型机（RoboParty Roboto Origin）走线说明</a> (Feishu wiki, space “【内部】RoboParty Roboto Origin资料”, author “萝博派对”, last modified 2 Sep 2026). Retrieved 12 Oct 2026.
+  </div>
+</header>
+
+<div class="box en">
+  <span class="tag">Purpose of this page</span>
+  <p>This document describes how the Roboto Origin prototype is wired: which harness goes between which pair of joint motors, how the battery, charging port, main power switch, emergency stop, three‑in‑one power board and the RDK X5 computer are installed and connected, and how the harnesses and CAN ports are secured against vibration. The robot is symmetric, so the source only shows the <strong>right leg</strong> and the <strong>left arm</strong>; the other side is mirrored. The waist is a separate run with its own instructions.</p>
+</div>
+
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#quickref">Quick reference</a> — joint map (Slave / Master / component ID)</li>
+    <li><a href="#s1">Harness BOM</a></li>
+    <li><a href="#s2">Wiring</a> — 2.1 legs, 2.2 waist, 2.3 arms, 2.4 battery (2.4.1 battery, 2.4.2 main board), 2.5 main board connections, 2.6 board‑to‑board</li>
+    <li><a href="#s3">Fixing</a> — 3.1 harnesses, 3.2 ports</li>
+    <li><a href="#notes">Translator’s notes and discrepancies</a></li>
+    <li><a href="#glossary">Glossary (Chinese → English)</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="quickref">Quick reference</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Robot</td><td>RoboParty Roboto Origin prototype (萝博头原型机)</td></tr>
+  <tr><td>IDs used in this doc</td><td>All motor numbers are <strong>Slave IDs</strong> (hex).</td></tr>
+  <tr><td>Left leg chain</td><td><code>0x01 → 0x02 → 0x03 → 0x04 → 0x05 → 0x06</code></td></tr>
+  <tr><td>Right leg chain</td><td><code>0x07 → 0x08 → 0x09 → 0x0A → 0x0B → 0x0C</code></td></tr>
+  <tr><td>Waist</td><td>One motor, <code>0x0D</code>, chained to right‑leg motor <code>0x07</code></td></tr>
+  <tr><td>Left arm chain</td><td><code>0x0E → 0x0F → 0x10 → 0x11 → 0x12</code></td></tr>
+  <tr><td>Right arm chain</td><td><code>0x13 → 0x14 → 0x15 → 0x16 → 0x17</code></td></tr>
+  <tr><td>Power board CAN channels</td><td><code>CAN0</code> ← motor 0x01 (left leg) · <code>CAN1</code> ← motor 0x0D (waist + right leg) · <code>CAN2</code> ← motor 0x0E (left arm) · <code>CAN3</code> ← motor 0x13 (right arm). Order rule: left before right, legs before arms. Follow the silkscreen on the PCB.</td></tr>
+  <tr><td>Compute</td><td>RDK X5. USB → Type‑C cable to the USB‑to‑CAN port of the three‑in‑one power board; Type‑C → Type‑C from the board’s 5 V output to the RDK X5 power input; IMU and gamepad receiver plug into RDK X5 USB directly.</td></tr>
+  <tr><td>Connectors</td><td><code>XT30U‑F</code> (power only) and <code>XT30(+2)‑F.G.B</code> (XT30 with two extra signal pins carrying CAN). Voltage display uses a GH1.25 connector. Charging socket is a 3‑pin circular (aviation‑style) connector on the back panel.</td></tr>
+  <tr><td>Motors seen in photos</td><td>DM‑J10010L‑2EC (hip) and DM‑J4340P‑2EC; each has a power port and a <code>RS485 A B | CAN H L</code> signal port.</td></tr>
+  <tr><td>Backplate headers (Fig. 18)</td><td>Main switch: <code>5V, GND, 5V_OUT, LED+</code>. E‑stop: <code>48VIN, 48V</code>. USB2CAN programming header: <code>CL1 SD1 GND 3V3</code> … <code>CL4 SD4 GND 3V3</code>.</td></tr>
+  <tr><td>Fasteners (battery / board stage)</td><td>Screws: M3×16 ×2, M4×12 ×2, M5×12 ×2. Standoffs: M3×17 ×4, M3 8 mm + 3 mm thread ×8.</td></tr>
+  <tr><td>3D‑printed carriers</td><td><a href="https://github.com/Roboparty/rpo_hardware/tree/main/V2.0/roboto_origin_mechanic/02_Manufacturing/3D_Printing/A2_3D_print">rpo_hardware … /A2_3D_print</a> — files “PCB载板” (PCB carrier board) and “PCB转接板4.0” (PCB adapter board 4.0).</td></tr>
+  <tr><td>Securing</td><td>Harness clips at every port; UV glue on CAN connectors so they cannot pull out during motion.</td></tr>
+</table>
+
+<h3 id="jointmap">Joint map (transcribed from Fig. 1)</h3>
+<p class="sub">Component ID and joint name as printed on the overview drawing; Master ID = Slave ID + 0x10. “Left/right” are the robot’s own left/right.</p>
+<table>
+  <tr><th>#</th><th>Joint (CN)</th><th>Joint (EN)</th><th>Slave ID</th><th>Master ID</th><th>Bus</th></tr>
+  <tr><td>1</td><td>左髋旋转</td><td>Left hip rotation (yaw)</td><td><code>0x01</code></td><td><code>0x11</code></td><td rowspan="6">CAN0</td></tr>
+  <tr><td>2</td><td>左髋侧摆</td><td>Left hip side swing (roll)</td><td><code>0x02</code></td><td><code>0x12</code></td></tr>
+  <tr><td>3</td><td>左髋前摆</td><td>Left hip forward swing (pitch)</td><td><code>0x03</code></td><td><code>0x13</code></td></tr>
+  <tr><td>4</td><td>左膝</td><td>Left knee</td><td><code>0x04</code></td><td><code>0x14</code></td></tr>
+  <tr><td>5</td><td>左踝上</td><td>Left ankle, upper</td><td><code>0x05</code></td><td><code>0x15</code></td></tr>
+  <tr><td>6</td><td>左踝下</td><td>Left ankle, lower</td><td><code>0x06</code></td><td><code>0x16</code></td></tr>
+  <tr><td>7</td><td>右髋旋转</td><td>Right hip rotation (yaw)</td><td><code>0x07</code></td><td><code>0x17</code></td><td rowspan="7">CAN1</td></tr>
+  <tr><td>8</td><td>右髋侧摆</td><td>Right hip side swing (roll)</td><td><code>0x08</code></td><td><code>0x18</code></td></tr>
+  <tr><td>9</td><td>右髋前摆</td><td>Right hip forward swing (pitch)</td><td><code>0x09</code></td><td><code>0x19</code></td></tr>
+  <tr><td>10</td><td>右膝</td><td>Right knee</td><td><code>0x0A</code></td><td><code>0x1A</code></td></tr>
+  <tr><td>11</td><td>右踝上</td><td>Right ankle, upper</td><td><code>0x0B</code></td><td><code>0x1B</code></td></tr>
+  <tr><td>12</td><td>右踝下</td><td>Right ankle, lower</td><td><code>0x0C</code></td><td><code>0x1C</code></td></tr>
+  <tr><td>13</td><td>躯干旋转</td><td>Torso rotation (waist yaw)</td><td><code>0x0D</code></td><td><code>0x1D</code></td></tr>
+  <tr><td>14</td><td>左肩前摆</td><td>Left shoulder forward swing (pitch)</td><td><code>0x0E</code></td><td><code>0x1E</code></td><td rowspan="5">CAN2</td></tr>
+  <tr><td>15</td><td>左肩侧摆</td><td>Left shoulder side swing (roll)</td><td><code>0x0F</code></td><td><code>0x1F</code></td></tr>
+  <tr><td>16</td><td>左肩旋转</td><td>Left shoulder rotation (yaw)</td><td><code>0x10</code></td><td><code>0x20</code></td></tr>
+  <tr><td>17</td><td>左肘</td><td>Left elbow</td><td><code>0x11</code></td><td><code>0x21</code></td></tr>
+  <tr><td>18</td><td>左臂旋转</td><td>Left arm rotation (forearm)</td><td><code>0x12</code></td><td><code>0x22</code></td></tr>
+  <tr><td>19</td><td>右肩前摆</td><td>Right shoulder forward swing (pitch)</td><td><code>0x13</code></td><td><code>0x23</code></td><td rowspan="5">CAN3</td></tr>
+  <tr><td>20</td><td>右肩侧摆</td><td>Right shoulder side swing (roll)</td><td><code>0x14</code></td><td><code>0x24</code></td></tr>
+  <tr><td>21</td><td>右肩旋转</td><td>Right shoulder rotation (yaw)</td><td><code>0x15</code></td><td><code>0x25</code></td></tr>
+  <tr><td>22</td><td>右肘</td><td>Right elbow</td><td><code>0x16</code></td><td><code>0x26</code></td></tr>
+  <tr><td>23</td><td>右臂旋转</td><td>Right arm rotation (forearm)</td><td><code>0x17</code></td><td><code>0x27</code></td></tr>
+</table>
+<p class="sub">The “Bus” column is derived from section 2.5 (which motor feeds which CAN channel) and the chain order in section 2; it is not printed on the drawing.</p>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. Harness BOM</h2>
+<div class="box en">
+  <span class="tag">Context</span>
+  <p>Twelve harness types are listed. Column meanings: part number (with the joint pair it serves), connector/cable type, finished length, quantity, and remarks about connector orientation. The parenthetical “gh1.25 2pin 反线 NN cm” on the leg/body entries describes an accompanying GH1.25 2‑pin reverse‑wired lead of the stated length. “90°” refers to right‑angle connector exits; “上下” (top/bottom) and “同向” (same direction) describe where the CAN wires leave the connector.</p>
+</div>
+
+<table>
+  <tr><th>No.</th><th>Harness type</th><th>Length</th><th>Qty</th><th>Remarks</th></tr>
+  <tr><td>RBW_Origin_01 Arm01</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>2</td><td>90° at both ends, CAN wires exit top/bottom</td></tr>
+  <tr><td>RBW_Origin_02 Arm02</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>2</td><td>90°, CAN wires top/bottom ×2</td></tr>
+  <tr><td>RBW_Origin_03 Arm03</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>2</td><td>90° at both ends, CAN wires same direction ×2</td></tr>
+  <tr><td>RBW_Origin_04 Arm04</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>2</td><td>90° at both ends, CAN wires top/bottom ×2</td></tr>
+  <tr><td>RBW_Origin_05 Leg01</td><td>XT30U‑F — XT30U‑F (GH1.25 2‑pin reverse lead 30 cm)</td><td>25 cm</td><td>2</td><td></td></tr>
+  <tr><td>RBW_Origin_06 Leg02</td><td>XT30U‑F — XT30U‑F (GH1.25 2‑pin reverse lead 30 cm)</td><td>25 cm</td><td>2</td><td></td></tr>
+  <tr><td>RBW_Origin_07 Leg03</td><td>XT30U‑F — XT30U‑F (GH1.25 2‑pin reverse lead 50 cm)</td><td>40 cm</td><td>2</td><td></td></tr>
+  <tr><td>RBW_Origin_08 Leg04</td><td>XT30U‑F — XT30(+2)‑F.G.B (GH1.25 2‑pin reverse lead 35 cm)</td><td>30 cm</td><td>2</td><td>90° on the (2+2) end</td></tr>
+  <tr><td>RBW_Origin_09 Leg05</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>10 cm</td><td>2</td><td>1: side‑exit 90° (left); 2: side‑exit 90° (right). Keep the CAN‑wire orientation consistent at assembly (top/bottom as soldered).</td></tr>
+  <tr><td>RBW_Origin_10 Body01</td><td>XT30U‑F — XT30U‑F (GH1.25 2‑pin reverse lead 30 cm)</td><td>20 cm</td><td>1</td><td></td></tr>
+  <tr><td>RBW_Origin_11 Body02</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>2</td><td>90° at one end ×2</td></tr>
+  <tr><td>RBW_Origin_12 Body03</td><td>XT30(+2)‑F.G.B — XT30U‑F (GH1.25 2‑pin reverse lead 65 cm)</td><td>60 cm</td><td>1</td><td></td></tr>
+</table>
+<p class="sub">The source table has three further empty rows. Section 2.5 also uses a <strong>RBW_Origin_13 Body04</strong> harness (XT30(+2)‑F.G.B — XT30U‑F, 50 cm) that is not in the BOM; see <a href="#notes">notes</a>.</p>
+
+<details><summary>Original Chinese (1)</summary><div class="zh">1. 线材BOM表
+编号 | 线束类型 | 线束长度 | 线束数量 | 备注
+RBW_Origin_01 Arm01 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 20cm | 2 | 双头90°can线上下
+RBW_Origin_02 Arm02 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 20cm | 2 | 90°can线上下*2
+RBW_Origin_03 Arm03 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 20cm | 2 | 双头90° can线同向*2
+RBW_Origin_04 Arm04 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 20cm | 2 | 双头90°can线上下*2
+RBW_Origin_05 Leg01 | XT30U-F-XT30U-F (gh1.25 2pin 反线 30cm) | 25cm | 2 |
+RBW_Origin_06 Leg02 | XT30U-F-XT30U-F (gh1.25 2pin 反线 30cm) | 25cm | 2 |
+RBW_Origin_07 Leg03 | XT30U-F-XT30U-F (gh1.25 2pin 反线 50cm) | 40cm | 2 |
+RBW_Origin_08 Leg04 | XT30U-F-XT30(+2)-F.G.B (gh1.25 2pin 反线 35cm) | 30cm | 2 | （2+2）端 90°
+RBW_Origin_09 Leg05 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 10cm | 2 | 1：侧面90°（左） 2：侧面90°（右） 装配时can线位置朝向统一（焊接时上下）
+RBW_Origin_10 Body01 | XT30U-F-XT30U-F (gh1.25 2pin 反线 30cm) | 20cm | 1 |
+RBW_Origin_11 Body02 | XT30(+2)-F.G.B-XT30(+2)-F.G.B | 20cm | 2 | 单头90°*2
+RBW_Origin_12 Body03 | XT30(+2)-F.G.B - XT30U-F (gh1.25 2pin 反线 65cm) | 60cm | 1 |</div></details>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. Wiring</h2>
+<div class="box en">
+  <span class="tag">Context</span>
+  <p>The robot has a symmetric structure and the wiring rules are the same on both sides. The text below describes only the <strong>right leg</strong> and the <strong>left arm</strong>; wire the right arm and left leg the same way by mirroring. The waist is an independent cable run and must be wired as described in 2.2.</p>
+  <p>All motor numbers below are <strong>Slave IDs</strong>.</p>
+  <p><strong>Wiring order</strong> (chain order along each limb):</p>
+  <ul>
+    <li>Right arm: <code>0x13 – 0x14 – 0x15 – 0x16 – 0x17</code></li>
+    <li>Left arm: <code>0x0E – 0x0F – 0x10 – 0x11 – 0x12</code></li>
+    <li>Right leg: <code>0x07 – 0x08 – 0x09 – 0x0A – 0x0B – 0x0C</code></li>
+    <li>Left leg: <code>0x01 – 0x02 – 0x03 – 0x04 – 0x05 – 0x06</code></li>
+    <li>Waist motor: <code>0x0D – 0x07</code></li>
+  </ul>
+</div>
+<figure class="tall">
+  <img src="images/01-wiring-overview.jpg" alt="Overview of the Roboto Origin motor wiring and ID layout">
+  <figcaption>Fig. 1 — Joint overview: Slave ID, Master ID and component ID/name for all 23 motors (transcribed in the joint map above).</figcaption>
+</figure>
+<details><summary>Original Chinese (2, intro)</summary><div class="zh">2. 接线部分
+本机器人采用对称结构设计，左右侧接线规则一致。下文仅对右腿、左手进行接线说明，右手、左腿接线方法参照执行。腰部为独立走线区域，接线方式需按照说明进行操作。
+下述所说为Slave ID。
+接线顺序：右手：0x13-0x14-0x15-0x16-0x17，左手：0x0E-0x0F-0x10-0x11-0x12，右腿：0x07-0x08-0x09-0x0a-0x0b-0x0c，左腿电机连接顺序：0x01-0x02-0x03-0x04-0x05-0x06，腰部电机：0x0d-0x07。</div></details>
+
+<h3 id="s21">2.1 Leg wiring (right leg shown)</h3>
+<table>
+  <tr><th>Link</th><th>Harness</th><th>Type</th><th>Length</th><th>Figure</th></tr>
+  <tr><td>Motor 0x07 – motor 0x08</td><td>RBW_Origin_05 Leg01</td><td>XT30U‑F — XT30U‑F</td><td>25 cm</td><td>Fig. 2</td></tr>
+  <tr><td>Motor 0x08 – motor 0x09</td><td>RBW_Origin_06 Leg02</td><td>XT30U‑F — XT30U‑F</td><td>25 cm</td><td>Fig. 3</td></tr>
+  <tr><td>Motor 0x09 – motor 0x0A</td><td>RBW_Origin_07 Leg03</td><td>XT30U‑F — XT30U‑F</td><td>40 cm</td><td>Fig. 4</td></tr>
+  <tr><td>Motor 0x0A – motor 0x0B</td><td>RBW_Origin_08 Leg04</td><td>XT30U‑F — XT30(+2)‑F.G.B</td><td>30 cm</td><td>Fig. 5</td></tr>
+  <tr><td>Motor 0x0B – motor 0x0C</td><td>RBW_Origin_09 Leg05</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>10 cm</td><td>Fig. 6</td></tr>
+</table>
+<div class="row">
+  <figure class="small"><img src="images/02-leg01-0x07-0x08.png" alt="Leg01 harness between motors 0x07 and 0x08"><figcaption>Fig. 2 — 0x07 → 0x08, RBW_Origin_05 Leg01.</figcaption></figure>
+  <figure class="small"><img src="images/03-leg02-0x08-0x09.png" alt="Leg02 harness between motors 0x08 and 0x09"><figcaption>Fig. 3 — 0x08 → 0x09, RBW_Origin_06 Leg02.</figcaption></figure>
+  <figure class="small"><img src="images/04-leg03-0x09-0x0a.png" alt="Leg03 harness between motors 0x09 and 0x0A"><figcaption>Fig. 4 — 0x09 → 0x0A, RBW_Origin_07 Leg03.</figcaption></figure>
+  <figure class="small"><img src="images/05-leg04-0x0a-0x0b.png" alt="Leg04 harness between motors 0x0A and 0x0B"><figcaption>Fig. 5 — 0x0A → 0x0B, RBW_Origin_08 Leg04.</figcaption></figure>
+  <figure class="small"><img src="images/06-leg05-0x0b-0x0c.png" alt="Leg05 harness between motors 0x0B and 0x0C"><figcaption>Fig. 6 — 0x0B → 0x0C, RBW_Origin_09 Leg05.</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.1)</summary><div class="zh">2.1 腿部接线
+电机 0x07–电机 0x08：选用编号 RBW_Origin_05 Leg01线束，规格为 XT30U-F-XT30U-F，长度 25cm。
+电机 0x08–电机 0x09：选用编号RBW_Origin_06 Leg02线束，规格为 XT30U-F-XT30U-F，长度 25cm。
+电机 0x09–电机 0x0a：选用编号RBW_Origin_07 Leg03线束，规格为 XT30U-F-XT30U-F，长度 40cm。
+电机 0x0a–电机 0x0b：选用编号RBW_Origin_08 Leg04线束，规格为 XT30U-F-XT30(+2)-F.G.B，长度 30cm。
+电机 0x0b–电机 0x0c：选用编号 RBW_Origin_09 Leg05线束，规格为 XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度 10cm。</div></details>
+
+<h3 id="s22">2.2 Waist wiring</h3>
+<div class="box en">
+  <span class="tag">Context</span>
+  <p>The waist has a single motor (ID <code>0x0D</code>). It connects to right‑leg motor <code>0x07</code>.</p>
+  <p>Motor 0x0D – motor 0x07: harness <strong>RBW_Origin_10 Body01</strong>, XT30U‑F — XT30U‑F, 20 cm.</p>
+</div>
+<div class="row">
+  <figure><img src="images/07-waist-overview.png" alt="Waist motor 0x0D location and link to right leg"><figcaption>Fig. 7 — Render of the pelvis: waist motor (电机) and the IMU mounted just below it.</figcaption></figure>
+  <figure class="small"><img src="images/08-body01-0x0d-0x07.png" alt="Body01 harness between motor 0x0D and 0x07"><figcaption>Fig. 8 — 0x0D → 0x07, RBW_Origin_10 Body01.</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.2)</summary><div class="zh">2.2 腰部接线
+腰部总共一个电机（ID：0X0d）连接右腿电机0x07
+电机 0x0d-电机 0x07：选用编号RBW_Origin_10 Body01线束，规格为 XT30U-F-XT30U-F，长度 20cm。</div></details>
+
+<h3 id="s23">2.3 Arm wiring (left arm shown)</h3>
+<table>
+  <tr><th>Link</th><th>Harness</th><th>Type</th><th>Length</th><th>Figure</th></tr>
+  <tr><td>Motor 0x0E – motor 0x0F</td><td>RBW_Origin_01 Arm01</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>Fig. 9</td></tr>
+  <tr><td>Motor 0x0F – motor 0x10</td><td>RBW_Origin_02 Arm02</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>Fig. 10</td></tr>
+  <tr><td>Motor 0x10 – motor 0x11</td><td>RBW_Origin_03 Arm03</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>Fig. 11</td></tr>
+  <tr><td>Motor 0x11 – motor 0x12</td><td>RBW_Origin_04 Arm04</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td><td>Fig. 12</td></tr>
+</table>
+<div class="row">
+  <figure class="small"><img src="images/09-arm01-0x0e-0x0f.png" alt="Arm01 harness between motors 0x0E and 0x0F"><figcaption>Fig. 9 — 0x0E → 0x0F, RBW_Origin_01 Arm01.</figcaption></figure>
+  <figure class="small"><img src="images/10-arm02-0x0f-0x10.png" alt="Arm02 harness between motors 0x0F and 0x10"><figcaption>Fig. 10 — 0x0F → 0x10, RBW_Origin_02 Arm02.</figcaption></figure>
+  <figure class="small"><img src="images/11-arm03-0x10-0x11.png" alt="Arm03 harness between motors 0x10 and 0x11"><figcaption>Fig. 11 — 0x10 → 0x11, RBW_Origin_03 Arm03.</figcaption></figure>
+  <figure class="small"><img src="images/12-arm04-0x11-0x12.png" alt="Arm04 harness between motors 0x11 and 0x12"><figcaption>Fig. 12 — 0x11 → 0x12, RBW_Origin_04 Arm04.</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.3)</summary><div class="zh">2.3 手部接线
+电机 0x0e–电机 0x0f：选用编号RBW_Origin_01 Arm01线束，规格为 XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度 20cm。
+电机 0x0f-电机 0x10：选用编号RBW_Origin_02 Arm02线束，规格为XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度20cm。
+电机 0x10-电机 0x11：选用编号RBW_Origin_03 Arm03线束，规格为XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度20cm。
+电机 0x11-电机 0x12：选用编号RBW_Origin_04 Arm04线束，规格为XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度20cm。</div></details>
+
+<h3 id="s24">2.4 Battery wiring</h3>
+<div class="box en">
+  <span class="tag">Screws and standoffs to prepare</span>
+  <ul>
+    <li>Screws: M3×16 ×2, M4×12 ×2, M5×12 ×2</li>
+    <li>Standoffs: M3×17 ×4, M3 (8 mm body + 3 mm thread) ×8</li>
+  </ul>
+</div>
+
+<h4 id="s241">2.4.1 Battery installation</h4>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <ul>
+    <li><strong>Battery protection:</strong> stick shock‑absorbing foam pads to the bottom and all four sides of the battery.
+      <ul><li><em>Purpose:</em> damp the high‑frequency vibration during motion and prevent the battery sleeve from chafing through, which would risk a short circuit.</li></ul>
+    </li>
+  </ul>
+</div>
+<figure class="tall"><img src="images/13-battery-foam-padding.jpg" alt="Battery with foam padding on bottom and sides"><figcaption>Fig. 13 — Foam padding on the battery.</figcaption></figure>
+<div class="box danger">
+  <span class="tag">Warning (from the source)</span>
+  <p>This stage involves high‑current wiring. Always double‑check wire gauge and polarity.</p>
+</div>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <ol>
+    <li><strong>Seat the battery:</strong> install the battery pack in its designated position on the base and make sure the centre of gravity is stable.</li>
+    <li><strong>Install the charging port:</strong>
+      <ul><li>Fix the charging socket to the robot’s back panel.</li></ul>
+    </li>
+  </ol>
+</div>
+<div class="row">
+  <figure class="tall"><img src="images/14-battery-in-place.jpg" alt="Battery pack seated on the base"><figcaption>Fig. 14 — Battery pack seated on the base.</figcaption></figure>
+  <figure class="tall"><img src="images/15-charge-port-back-panel.jpg" alt="Charging port mounted on the back panel"><figcaption>Fig. 15 — Charging port on the back panel.</figcaption></figure>
+  <figure class="small"><img src="images/16-charge-port-detail.png" alt="Charging port detail"><figcaption>Fig. 16 — Charging socket: 3‑pin circular connector in the back panel.</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.4, 2.4.1)</summary><div class="zh">2.4 电池连线
+螺丝铜柱准备：
+螺丝：m3*16×2，m4*12×2，m5*12×2
+铜柱：m3*17×4，m3*8+3×8
+2.4.1电池安装
+• 电池防护：在电池底部及四周粘贴减震海绵垫。
+  ◦ 目的： 缓冲运动中的高频振动，防止电池外皮磨损导致短路风险。
+此阶段涉及高电流线路，请务必核对线径与极性。
+1. 电池就位：将电池包安装至底座预定位置，确保重心稳固。
+2. 充电接口安装：
+  ◦ 将充电口固定于机器人背面板。</div></details>
+
+<h4 id="s242">2.4.2 Main board installation</h4>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <ol>
+    <li><strong>Solder the main power‑switch connector and the emergency‑stop switch</strong> (Fig. 17).
+      <div class="box warn" style="margin:6px 0"><strong>⚠️ Check the wire order — do not get it wrong!</strong> (Fig. 18, 19)</div>
+    </li>
+    <li>Switch specification and photo of the real part: Fig. 20, 21. The switch’s lead colours map to: <strong>green → C (common)</strong>, <strong>yellow → NO (normally open)</strong>, <strong>white → NC (normally closed)</strong>, <strong>black + red → lamp</strong> (lamp pins have no polarity). Variants: single‑colour 5‑pin, dual‑colour 6‑pin and 7‑pin.</li>
+    <li>How the PCB backplate silkscreen maps to the real connection: Fig. 22, 23. Backplate pads for the main switch are <code>5V</code>, <code>GND</code>, <code>5V_OUT</code>, <code>LED+</code>; the E‑stop goes on <code>48VIN</code> / <code>48V</code> (Fig. 18).</li>
+    <li>After testing that everything works, cut off the excess wire.
+      <br><em>Note:</em> go by the position of the wires on the switch — the colour order of the wires may differ from batch to batch.</li>
+    <li><strong>Install the mounting parts.</strong> Carrier‑board print files: <a href="https://github.com/Roboparty/rpo_hardware/tree/main/V2.0/roboto_origin_mechanic/02_Manufacturing/3D_Printing/A2_3D_print">github.com/Roboparty/rpo_hardware … /A2_3D_print</a>, files “PCB载板” (PCB carrier board) and “PCB转接板4.0” (PCB adapter board 4.0).
+      <ul><li>Fix with M3×16 screws from the underside (Fig. 24).</li></ul>
+    </li>
+    <li><strong>Fix the three‑in‑one power board</strong> (Fig. 25, 26). Use standoffs to fix the three‑in‑one board and add standoffs to raise it (Fig. 27, 28).</li>
+    <li><strong>Fix the RDK X5.</strong> Use M3×8 to fix the RDK X5 to the main carrier board, then fix that assembly to the three‑in‑one board (Fig. 29, 30).</li>
+  </ol>
+</div>
+<figure class="small"><img src="images/17-switch-estop-soldering.png" alt="Soldering the main switch connector and emergency stop"><figcaption>Fig. 17 — Backplate PCB with the illuminated push‑button main switch (4‑wire lead) and the E‑stop switch (two red 48 V wires) soldered on.</figcaption></figure>
+<div class="row">
+  <figure><img src="images/18-switch-wire-order-a.png" alt="Switch wire order, view A"><figcaption>Fig. 18 — Backplate silkscreen: main‑switch header (5V, GND, 5V_OUT, LED+), E‑stop header (48VIN, 48V), USB2CAN programming header.</figcaption></figure>
+  <figure class="small"><img src="images/19-switch-wire-order-b.png" alt="Switch wire order, view B"><figcaption>Fig. 19 — Switch lead soldered to the 5V / GND / 5V_OUT / LED+ pads (wire colours differ between batches).</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/20-switch-spec.png" alt="Switch specification"><figcaption>Fig. 20 — Switch pinout: green = C (common), yellow = NO, white = NC, black + red = lamp (no polarity). 5‑pin single‑colour, 6‑ and 7‑pin dual‑colour variants.</figcaption></figure>
+  <figure class="small"><img src="images/21-switch-photo.png" alt="Switch, real part"><figcaption>Fig. 21 — The push‑button switch with its 5‑wire lead.</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/22-pcb-backplate-silkscreen.jpg" alt="PCB backplate silkscreen"><figcaption>Fig. 22 — Close‑up of the main‑switch pads: 5V, GND, 5V_OUT, LED+.</figcaption></figure>
+  <figure><img src="images/23-pcb-backplate-connection.png" alt="PCB backplate, real connection"><figcaption>Fig. 23 — Which switch wire goes to which pad (this batch): 5V = yellow, GND = black, 5V_OUT = green, LED = red; blue unused.</figcaption></figure>
+</div>
+<figure class="small"><img src="images/24-carrier-m3x16-bottom.png" alt="Carrier fixed with M3x16 screws from below"><figcaption>Fig. 24 — 3D‑printed PCB carrier fixed with M3×16 screws from the underside.</figcaption></figure>
+<div class="row">
+  <figure class="small"><img src="images/25-power-board-mount-a.png" alt="Three-in-one power board mounting, view A"><figcaption>Fig. 25 — Three‑in‑one power board (A).</figcaption></figure>
+  <figure><img src="images/26-power-board-mount-b.png" alt="Three-in-one power board mounting, view B"><figcaption>Fig. 26 — Three‑in‑one power board (B).</figcaption></figure>
+</div>
+<div class="row">
+  <figure class="small"><img src="images/27-standoffs-a.png" alt="Standoffs on the power board, view A"><figcaption>Fig. 27 — Standoffs (A).</figcaption></figure>
+  <figure class="small"><img src="images/28-standoffs-b.png" alt="Standoffs on the power board, view B"><figcaption>Fig. 28 — Standoffs (B).</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/29-rdkx5-mount-a.png" alt="RDK X5 mounting, view A"><figcaption>Fig. 29 — RDK X5 on the carrier (A).</figcaption></figure>
+  <figure><img src="images/30-rdkx5-mount-b.png" alt="RDK X5 mounting, view B"><figcaption>Fig. 30 — RDK X5 on the carrier (B).</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.4.2)</summary><div class="zh">2.4.2主控板安装
+焊接主控开关接口以及急停开关。
+注意线序不要错误！
+开关规格与实物图：
+PCB背板丝印与实物图连接方式：
+测试无误后将多余的线材剪掉。
+注：可以按照开关线材位置来，每个批次的线材的颜色顺序可能不一致。
+◦ 安装固定件
+载板打印地址：https://github.com/Roboparty/rpo_hardware/tree/main/V2.0/roboto_origin_mechanic/02_Manufacturing/3D_Printing/A2_3D_print
+文件名称：PCB载板、PCB转接板4.0
+采用M3*16螺丝从底面进行固定。
+◦ 三合一供电板固定。
+采用铜柱对三合一板进行固定,并安装铜柱进行垫高处理。
+◦ RDKx5固定
+使用m3*8对RDKx5与主控载板进行固定，再与三合一板进行固定。</div></details>
+
+<h3 id="s25">2.5 Main board connections</h3>
+<div class="box en">
+  <span class="tag">Context</span>
+  <p>The free (second) connector of motors <code>0x0E</code>, <code>0x13</code>, <code>0x01</code> and <code>0x0D</code> all go to the three‑in‑one power board.</p>
+  <table>
+    <tr><th>Channel</th><th>Link</th><th>Harness</th><th>Type</th><th>Length</th></tr>
+    <tr><td><code>CAN0</code></td><td>Motor 0x01 – power board</td><td>RBW_Origin_12 Body03</td><td>XT30(+2)‑F.G.B — XT30U‑F</td><td>60 cm</td></tr>
+    <tr><td><code>CAN1</code></td><td>Motor 0x0D – power board</td><td>RBW_Origin_13 Body04</td><td>XT30(+2)‑F.G.B — XT30U‑F</td><td>50 cm</td></tr>
+    <tr><td><code>CAN2</code></td><td>Motor 0x0E – power board</td><td>RBW_Origin_11 Body02</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td></tr>
+    <tr><td><code>CAN3</code></td><td>Motor 0x13 – power board</td><td>RBW_Origin_11 Body02</td><td>XT30(+2)‑F.G.B — XT30(+2)‑F.G.B</td><td>20 cm</td></tr>
+  </table>
+  <p>Motors connect to the power board following the rule <strong>left before right, legs before arms</strong>: motor 0x01 → CAN0, motor 0x0D → CAN1, motor 0x0E → CAN2, motor 0x13 → CAN3. The PCB carries matching silkscreen labels; install according to the silkscreen.</p>
+</div>
+<figure><img src="images/31-power-board-can-connections.png" alt="CAN0–CAN3 connections on the three-in-one power board"><figcaption>Fig. 31 — CAN0–CAN3 connections on the three‑in‑one power board.</figcaption></figure>
+<details><summary>Original Chinese (2.5)</summary><div class="zh">2.5 主控连线
+电机 0x0e、电机 0x13、电机 0x01、电机 0x0d 的另一接口，统一连接至三合一供电板。
+CAN0通道：电机0x01-供电板：选用编号RBW_Origin_12 Body03线束，规格为XT30(+2)-F.G.B-XT30U-F ，长度为60cm。
+CAN1通道：电机0x0d-供电板：选用编号RBW_Origin_13 Body04线束，规格为XT30(+2)-F.G.B-XT30U-F ，长度为50cm。
+CAN2通道：电机0x0e-供电板：选用编号RBW_Origin_11 Body02 线束，规格为XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度为20cm。
+CAN3通道：电机0x13-供电板：选用编号RBW_Origin_11 Body02 线束，规格为XT30(+2)-F.G.B-XT30(+2)-F.G.B，长度为20cm。
+电机连接供电板遵循先左后右，先腿后手的原则。电机 0x01 对应连接 CAN0，电机 0x0d 对应连接 CAN1，电机 0x0e 对应连接 CAN2，电机 0x13 对应连接 CAN3,PCB板上印有相对应的丝印，根据丝印进行安装。</div></details>
+
+<h3 id="s26">2.6 Board‑to‑board connections</h3>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <ol>
+    <li>The RDK X5 uses a <strong>USB‑A to Type‑C</strong> cable from one of its USB ports to the <strong>USB‑to‑CAN</strong> port on the three‑in‑one power board (Fig. 32, 33).</li>
+    <li>The RDK X5 uses a <strong>Type‑C to Type‑C</strong> cable from the <strong>5 V supply</strong> port on the three‑in‑one power board to the RDK X5 power input (Fig. 34, 35).</li>
+    <li>The <strong>IMU</strong> and the <strong>gamepad receiver</strong> plug directly into the RDK X5 USB ports (Fig. 36).</li>
+    <li>The voltage display connects via a <strong>GH1.25</strong> connector.</li>
+    <li>The port layout and pin definitions of the three‑in‑one power board are shown in Fig. 37, 38. Follow the silkscreen exactly and avoid reversed connections.</li>
+  </ol>
+</div>
+<div class="row">
+  <figure><img src="images/32-usb-to-typec-a.png" alt="USB to Type-C cable, RDK X5 to USB-to-CAN, view A"><figcaption>Fig. 32 — USB2CAN cable (USB‑A on the RDK X5 → Type‑C on the power board).</figcaption></figure>
+  <figure><img src="images/33-usb-to-typec-b.png" alt="USB to Type-C cable, RDK X5 to USB-to-CAN, view B"><figcaption>Fig. 33 — USB → Type‑C to the USB‑to‑CAN port (B).</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/34-typec-to-typec-a.png" alt="Type-C to Type-C 5 V supply, view A"><figcaption>Fig. 34 — RDK X5 power input (Type‑C, labelled 电源接口).</figcaption></figure>
+  <figure><img src="images/35-typec-to-typec-b.png" alt="Type-C to Type-C 5 V supply, view B"><figcaption>Fig. 35 — Type‑C → Type‑C 5 V supply (B).</figcaption></figure>
+</div>
+<figure><img src="images/36-imu-gamepad-receiver-usb.png" alt="IMU and gamepad receiver plugged into RDK X5 USB"><figcaption>Fig. 36 — Gamepad receiver port and IMU port on the RDK X5 USB stack.</figcaption></figure>
+<div class="row">
+  <figure><img src="images/37-power-board-layout-a.png" alt="Three-in-one power board port layout, view A"><figcaption>Fig. 37 — Power board render: voltage‑display connector (GH1.25) highlighted; 48V/GND + CAN0–CAN3 headers along the bottom edge, USB2CAN and 5V_OUT Type‑C on top.</figcaption></figure>
+  <figure><img src="images/38-power-board-layout-b.png" alt="Three-in-one power board port layout, view B"><figcaption>Fig. 38 — Same board, photo: voltage‑display connector next to the 48VIN XT60.</figcaption></figure>
+</div>
+<details><summary>Original Chinese (2.6)</summary><div class="zh">2.6 板间连接
+RDKx5使用usb to typec线束，通过 USB 接口连接三合一供电板上的 USB-to-CAN 接口。
+RDKx5使用typec to typec 线束，通过三合一供电板上的 5v供电接口接入RDKx5供电口。
+IMU 与手柄接收器则通过 USB 接口直接连接至RDKx5。
+电压显示连接口为gh1.25口。
+三合一供电板的接口布局与定义如下所示，连接时请严格参照丝印标识，避免反接。</div></details>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. Fixing</h2>
+
+<h3 id="s31">3.1 Harness fixing</h3>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <p>Use harness clips (cable retainers) to fix each harness at its port, so that a loosening connector cannot cause unstable signal transmission (Fig. 39).</p>
+</div>
+<figure><img src="images/39-harness-clip.png" alt="Harness fixed with a clip at the port"><figcaption>Fig. 39 — Harness clips (线束固定器) at the motor ports; the motor signal port is labelled RS485 A B | CAN H L.</figcaption></figure>
+<details><summary>Original Chinese (3.1)</summary><div class="zh">3.1 线束固定
+线束固定方式：采用线束固定器将线束在端口处进行固定，防止因端口松动导致信号传输不稳定。</div></details>
+
+<h3 id="s32">3.2 Port fixing</h3>
+<div class="box en">
+  <span class="tag">Instructions</span>
+  <p>To stop CAN connectors from coming loose or being torn off during motion, reinforce the ports with UV‑curing glue (Fig. 40).</p>
+</div>
+<figure><img src="images/40-can-port-uv-glue.png" alt="CAN port reinforced with UV glue"><figcaption>Fig. 40 — CAN connector reinforced with UV glue (UV 胶固定).</figcaption></figure>
+<details><summary>Original Chinese (3.2)</summary><div class="zh">3.2 端口固定
+为防止 CAN 端口在运动过程中发生脱落或拽断，可使用 UV 胶对端口进行加固固定。</div></details>
+
+<!-- ============================================================ -->
+<h2 id="notes">Translator’s notes and discrepancies</h2>
+<ul class="check">
+  <li><strong>RBW_Origin_13 Body04</strong> (CAN1, motor 0x0D → power board, XT30(+2)‑F.G.B — XT30U‑F, 50 cm) is used in 2.5 but missing from the BOM table in section 1.</li>
+  <li>For the leg/body harnesses the parenthetical GH1.25 lead length (30/30/50/35/30/65 cm) is 5–10 cm longer than the harness length column (25/25/40/30/20/60 cm). The translation keeps both numbers as written.</li>
+  <li>The waist motor 0x0D feeds the power board on <code>CAN1</code> and chains into right‑leg motor 0x07, so CAN1 carries the <strong>waist + right leg</strong>, and CAN0 carries the <strong>left leg</strong>. This matches the bus assignment used in <code>tools/README.md</code> (can0 left leg, can1 right leg + waist).</li>
+  <li>“XT30(+2)‑F.G.B” is reproduced verbatim; it denotes the XT30 power connector with two additional signal pins (XT30(2+2)) used for CAN H/L. The meaning of the suffix “F.G.B” is not explained in the source.</li>
+  <li>The source does not state which USB port on the RDK X5 to use, nor the wire colours for the switch/E‑stop; it explicitly says colour order varies between batches, so go by position.</li>
+  <li>Image captions are derived from the surrounding text, not from the images themselves.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="glossary">Glossary (Chinese → English)</h2>
+<table>
+  <tr><th>Chinese</th><th>English</th></tr>
+  <tr><td>走线说明</td><td>wiring / cable‑routing guide</td></tr>
+  <tr><td>线材 BOM 表 / 线束</td><td>harness BOM / harness (cable assembly)</td></tr>
+  <tr><td>反线</td><td>reverse‑wired lead (pin order swapped end to end)</td></tr>
+  <tr><td>双头 90° / 单头 90°</td><td>right‑angle connector at both ends / at one end</td></tr>
+  <tr><td>can 线上下 / 同向</td><td>CAN wires exit top/bottom / same direction</td></tr>
+  <tr><td>腿部 / 腰部 / 手部</td><td>leg / waist / arm</td></tr>
+  <tr><td>电池就位</td><td>seat the battery</td></tr>
+  <tr><td>减震海绵垫</td><td>shock‑absorbing foam pad</td></tr>
+  <tr><td>充电口</td><td>charging port</td></tr>
+  <tr><td>主控板 / 主控载板</td><td>main (control) board / main carrier board</td></tr>
+  <tr><td>急停开关</td><td>emergency‑stop switch</td></tr>
+  <tr><td>线序</td><td>wire order (pin sequence)</td></tr>
+  <tr><td>丝印</td><td>silkscreen (PCB legend)</td></tr>
+  <tr><td>铜柱</td><td>standoff (brass)</td></tr>
+  <tr><td>三合一供电板</td><td>three‑in‑one power board (power distribution + USB‑to‑CAN + 5 V output)</td></tr>
+  <tr><td>手柄接收器</td><td>gamepad receiver</td></tr>
+  <tr><td>电压显示</td><td>voltage display</td></tr>
+  <tr><td>线束固定器</td><td>harness clip / cable retainer</td></tr>
+  <tr><td>UV 胶</td><td>UV‑curing glue</td></tr>
+</table>
+
+</div>
+</body>
+</html>
